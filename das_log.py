@@ -16,23 +16,33 @@ print time.strftime("%Y-%m-%d_%H:%M :: "),"START"
 
 #Function to grab commands and the door state from the serial input buffer
 #Data is sent using a very simple protocol with no error-checking, bad data is simply discarded
+#Protocol is very basic, in the form "[command] [argument];[command] [argument];[command] [argument];..."
 def getCommands():
 	inputBytes=[]
 	command=[]
 	commands=[]
 	command_completed=False
-	while command_completed == False:									#while there's still commands in the buffer
-		byte=ser.read(1)												#read 1 byte in
-		if byte == ';':													#if the byte marks the end of the command argument
-			command.append(''.join(inputBytes))							#add the command parameter to the command list (as string)
-			commands.append(command)									#add the command to the commands list
-			inputBytes=[]												#clear lists
+	while command_completed == False:	#while there's still commands in the buffer
+		byte=ser.read(1)				#read 1 byte in
+		
+		#if the byte marks the end of the command-argument pair
+		if byte == ';':					
+			#add the command argument to the command list (as string)
+			command.append(''.join(inputBytes))							
+			#add the command to the commands list
+			commands.append(command)									
+			inputBytes=[]				#clear lists
 			command=[]
+			#only stop reading if theres no bytes and if we end on a ;
 			if ser.inWaiting() == 0:
-				command_completed=True									#only stop reading if theres no bytes and if we end on a ;
-		elif byte == ' ':												#if the byte marks the end of the command
-			command.append(''.join(inputBytes))							#add the command to the command list (as string)
-			inputBytes=[]												#clear list
+				command_completed=True									
+		
+		#if the byte marks the end of the command
+		elif byte == ' ':
+			#add the command to the command list (as string)												
+			command.append(''.join(inputBytes))							
+			#clear list
+			inputBytes=[]												
 		else:
 			inputBytes.append(byte)
 
