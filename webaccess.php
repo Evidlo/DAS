@@ -46,7 +46,7 @@ body{
 }
 
 #currstates{
-	width:400px;
+	width:500px;
 	display:inline-block;
 	vertical-align:top;
 	font-size:32px;
@@ -119,7 +119,6 @@ table{
 		}
 		echo "<div class=\"para-b\" style=\"color:white;background-color:$color\">$text</div>";
 
-		echo "<br>";
 		
 		$db = new PDO('sqlite:/home/evan/DAS/test.db');
 		$controls = $db->query('SELECT * FROM Controls')->fetchALL();
@@ -136,6 +135,26 @@ table{
 
 		echo "<div class=\"para-a\">Locked</div>";
 
+		echo "<div class=\"para-b\" style=\"color:white;background-color:$color\">$text</div>";
+		
+		echo "<br>";
+		
+		echo "<div class=\"para-a\">Event Listener</div>";
+
+		exec("systemctl is-active das.service",$status);
+		switch($status[0]){
+			case "active":
+				$text = "Running";
+				$color = "green";
+				break;
+			case "inactive":
+				$text = "Failed";
+				$color = "red";
+				break;
+			default:
+				$text = "Unknown";
+				$color = "yellow";
+		}
 		echo "<div class=\"para-b\" style=\"color:white;background-color:$color\">$text</div>";
 		?>
 
