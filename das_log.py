@@ -11,7 +11,7 @@ import sys
 #Create objects for accessing sqlite database and serial connection
 conn = sqlite3.connect('test.db')
 cur = conn.cursor()
-ser = serial.Serial('/dev/ttyUSB0')
+ser = serial.Serial('/dev/arduino')
 print time.strftime("%Y-%m-%d_%H:%M :: "),"START"
 
 #Function to grab commands and the door state from the serial input buffer
