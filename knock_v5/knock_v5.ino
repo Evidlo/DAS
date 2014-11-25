@@ -38,14 +38,14 @@ void loop(){
   }
   
   doorstate=digitalRead(hallPin);
-  if(doorstate == 0 && last_doorstate == 1){
+  if(doorstate == 1 && last_doorstate == 0){
     Serial.print("door ");
     Serial.print(doorstate);
     Serial.print(";");
-    delay(1000);
-    controlDevice(0,1);
+    delay(1500);
+    controlDevice(0,0);
   }
-  if(doorstate == 1 && last_doorstate == 0){
+  if(doorstate == 0 && last_doorstate == 1){
     Serial.print("door ");
     Serial.print(doorstate);
     Serial.print(";");
@@ -65,22 +65,22 @@ void controlDevice(char device_id, char control){
   Serial.print(";");
   switch (device_id){
     case 0:
-      digitalWrite(servoPowerPin,HIGH);
+      digitalWrite(servoPowerPin,LOW);
       switch(control){
         case 0:
-          doorServo.write(50);
+          doorServo.write(20);
           device_states[device_id]=0;
           break;
         case 1:
-          doorServo.write(150);
+          doorServo.write(190);
           device_states[device_id]=1;
           break;
         case 2:
           controlDevice(device_id,1-device_states[device_id]);
           break;
       }
-      delay(1000);
-      digitalWrite(servoPowerPin,LOW);
+      delay(1500);
+      digitalWrite(servoPowerPin,HIGH);
       break;
     case 1:
       switch(control){
