@@ -13,6 +13,7 @@ int hallPin = 4;
 int relay1Pin = 6;
 int relay2Pin = 7;
 
+int debounce_time=100;
 
 boolean last_doorstate=0;
 boolean doorstate=0;
@@ -28,6 +29,7 @@ void setup(){
     Serial.begin(9600);
     
     doorServo.attach(servoPin);
+    digitalWrite(servoPowerPin,HIGH);
 }
 
 void loop(){
@@ -38,14 +40,19 @@ void loop(){
   }
   
   doorstate=digitalRead(hallPin);
-  if(doorstate == 1 && last_doorstate == 0){
+  if(doorstate != last_doorstate){
+    delay(debounce_time);
+    doorstate=digitalRead(hallPin);
+  }
+  
+  if(doorstate == 0 && last_doorstate == 1){
     Serial.print("door ");
     Serial.print(doorstate);
     Serial.print(";");
     delay(1500);
-    controlDevice(0,0);
+    controlDevice(0,1);
   }
-  if(doorstate == 0 && last_doorstate == 1){
+  if(doorstate == 1 && last_doorstate == 0){
     Serial.print("door ");
     Serial.print(doorstate);
     Serial.print(";");
@@ -68,11 +75,11 @@ void controlDevice(char device_id, char control){
       digitalWrite(servoPowerPin,LOW);
       switch(control){
         case 0:
-          doorServo.write(20);
+          doorServo.write(10);
           device_states[device_id]=0;
           break;
         case 1:
-          doorServo.write(190);
+          doorServo.write(240);
           device_states[device_id]=1;
           break;
         case 2:
@@ -114,7 +121,6 @@ void controlDevice(char device_id, char control){
       break;
 
   }
-  tone(6,440,200);        //play ok sound
   return;
 
 }
