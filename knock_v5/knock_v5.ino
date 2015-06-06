@@ -6,6 +6,14 @@
 
 int device_states[3] = {0,0,0};
 
+//Device IDs and Commands
+#define servoID 0
+#define servoOPEN 0
+#define servoCLOSE 1
+#define servoTOGGLE 2
+#define relay1ID 1
+#define relay2ID 2
+
 //Pin setup
 int servoPowerPin = 2;
 int servoPin = 3;
@@ -15,8 +23,9 @@ int relay2Pin = 7;
 
 int debounce_time=100;
 
-boolean last_doorstate=0;
-boolean doorstate=0;
+boolean doorstate=1;
+boolean last_doorstate=doorstate;
+
 boolean new_seq=false;
 Servo doorServo;
 
@@ -34,9 +43,12 @@ void setup(){
 
 void loop(){
   if(Serial.available()){
-    char inBytes[2];
-    Serial.readBytesUntil('\n',inBytes,2);
-    controlDevice(inBytes[0]-48,inBytes[1]-48);
+    int inByte = Serial.read();
+    
+    int device_id = inByte / 3;
+    int command = inByte % 3;
+
+    controlDevice(device_id,command);
   }
   
   doorstate=digitalRead(hallPin);
@@ -62,63 +74,60 @@ void loop(){
 
 }
 
-
-
-void controlDevice(char device_id, char control){
-  //control: 0 - on; 1 - off; 2 - toggle
+void controlDevice(int device_id,int command){
   Serial.print("control ");
-  Serial.print(int(device_id));
-  Serial.print(int(control));
+  Serial.print("command ");
+  Serial.print(command);
+  Serial.print(" device_id ");
+  Serial.print(device_id);
   Serial.print(";");
   switch (device_id){
-    case 0:
+    case servoID:
       digitalWrite(servoPowerPin,LOW);
-      switch(control){
-        case 0:
+      switch(command){
+        case servoOPEN:
           doorServo.write(10);
-          device_states[device_id]=0;
+          device_states[servoID]=0;
           break;
-        case 1:
+        case servoCLOSE:
           doorServo.write(240);
-          device_states[device_id]=1;
+          device_states[servoID]=1;
           break;
-        case 2:
-          controlDevice(device_id,1-device_states[device_id]);
+        case servoTOGGLE:
+          controlDevice(servoID,1-device_states[servoID]);
           break;
       }
       delay(1500);
       digitalWrite(servoPowerPin,HIGH);
       break;
-    case 1:
-      switch(control){
+    case relay1ID:
+     switch(command){
         case 0:
           digitalWrite(relay1Pin,LOW);
-          device_states[device_id]=0;
+          device_states[relay1ID]=0;
           break;
         case 1:
           digitalWrite(relay1Pin,HIGH);
-          device_states[device_id]=1;
+          device_states[relay1ID]=1;
           break;
         case 2:
-          controlDevice(device_id,1-device_states[device_id]);
+          controlDevice(relay2ID,1-device_states[relay2ID]);
           break;
       }
-      break;
-    case 2:
-      switch(control){
+    case relay2ID:
+      switch(command){
         case 0:
           digitalWrite(relay2Pin,LOW);
-          device_states[device_id]=0;
+          device_states[relay2ID]=0;
           break;
         case 1:
           digitalWrite(relay2Pin,HIGH);
-          device_states[device_id]=1;
+          device_states[relay2ID]=1;
           break;
         case 2:
-          controlDevice(device_id,1-device_states[device_id]);
+          controlDevice(relay2ID,1-device_states[relay2ID]);
           break;
       }
-      break;
 
   }
   return;
